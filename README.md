@@ -10,6 +10,7 @@ A production-ready Rust backend template built with Axum, SeaORM, and PostgreSQL
 - [API Endpoints](#api-endpoints)
 - [Setup](#setup)
 - [Running](#running)
+- [Testing](#testing)
 
 ## Features
 
@@ -538,6 +539,107 @@ The server will start on `http://SERVER_HOST:SERVER_PORT` (default: `http://0.0.
 
 ```bash
 cargo run -- run_migrations
+```
+
+## Testing
+
+The project includes comprehensive unit and integration tests.
+
+### Test Structure
+
+```
+tests/
+├── auth_service_test.rs      # Unit tests for authentication service
+├── validation_test.rs         # Unit tests for request validation
+├── common/                    # Shared test utilities
+│   └── mod.rs
+└── integration/               # Integration tests for API endpoints
+    ├── auth.rs                # Authentication endpoint tests
+    ├── health.rs              # Health check endpoint tests
+    ├── users.rs               # User management endpoint tests
+    └── tenants.rs             # Tenant endpoint tests
+```
+
+### Running Tests
+
+#### Run All Tests
+
+```bash
+cargo test
+```
+
+#### Run Only Unit Tests
+
+```bash
+cargo test --test auth_service_test
+cargo test --test validation_test
+```
+
+#### Run Only Integration Tests
+
+```bash
+cargo test --test integration
+```
+
+#### Run Tests with Output
+
+```bash
+cargo test -- --nocapture
+```
+
+#### Run Specific Test
+
+```bash
+cargo test test_hash_password
+```
+
+### Unit Tests
+
+Unit tests are located in the `tests/` directory and test individual functions and services:
+
+- **`auth_service_test.rs`**: Tests for password hashing, JWT token generation/verification
+- **`validation_test.rs`**: Tests for request validation (email format, password length, etc.)
+
+### Integration Tests
+
+Integration tests are located in `tests/integration/` and test full HTTP endpoints:
+
+- **`auth.rs`**: Tests for `/api/auth/register`, `/api/auth/login`, `/api/auth/refresh`
+- **`health.rs`**: Tests for `/health` endpoint
+- **`users.rs`**: Tests for user management endpoints
+- **`tenants.rs`**: Tests for tenant endpoints
+
+**Note**: Integration tests require a test database. Tests are currently marked with `#[ignore]` until test database setup is configured. To run ignored tests:
+
+```bash
+cargo test -- --ignored
+```
+
+### Test Coverage
+
+Current test coverage includes:
+
+- ✅ Password hashing and verification
+- ✅ JWT token generation and validation
+- ✅ Request validation (email, password length)
+- ✅ Error handling
+- ⏳ API endpoint integration tests (require test database setup)
+
+### Adding New Tests
+
+1. **Unit Tests**: Create a new file in `tests/` directory (e.g., `tests/my_service_test.rs`)
+2. **Integration Tests**: Add to appropriate file in `tests/integration/` or create new file
+
+Example unit test:
+
+```rust
+use template_rust_backend::services::my_service::MyService;
+
+#[test]
+fn test_my_function() {
+    let result = MyService::my_function();
+    assert!(result.is_ok());
+}
 ```
 
 ## Data Models

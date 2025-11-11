@@ -20,7 +20,7 @@ pub struct Claims {
     pub exp: i64,
 }
 
-#[derive(Debug, Deserialize, Validate)]
+#[derive(Debug, Deserialize, Validate, utoipa::ToSchema)]
 pub struct RegisterRequest {
     pub tenant_id: Uuid,
     #[validate(email(message = "Invalid email format"))]
@@ -33,7 +33,7 @@ pub struct RegisterRequest {
     pub password: String,
 }
 
-#[derive(Debug, Deserialize, Validate)]
+#[derive(Debug, Deserialize, Validate, utoipa::ToSchema)]
 pub struct LoginRequest {
     #[validate(email(message = "Invalid email format"))]
     pub email: String,
@@ -41,7 +41,7 @@ pub struct LoginRequest {
     pub password: String,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, utoipa::ToSchema)]
 pub struct AuthResponse {
     pub token: String,
     pub user: users::Model,

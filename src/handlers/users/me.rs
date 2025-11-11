@@ -6,6 +6,19 @@ use sea_orm::{DatabaseConnection, EntityTrait};
 use serde_json::Value;
 use std::sync::Arc;
 
+#[utoipa::path(
+    get,
+    path = "/api/me",
+    tag = "Users",
+    responses(
+        (status = 200, description = "Current user information", body = users::Model),
+        (status = 401, description = "Unauthorized"),
+        (status = 404, description = "User not found")
+    ),
+    security(
+        ("bearer" = [])
+    )
+)]
 pub async fn me(
     State(db): State<Arc<DatabaseConnection>>,
     claims: Claims,

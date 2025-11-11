@@ -5,6 +5,22 @@ use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter, QueryOr
 use serde_json::Value;
 use std::sync::Arc;
 
+#[utoipa::path(
+    get,
+    path = "/api/tenants/{tenant_id}/users",
+    tag = "Users",
+    params(
+        ("tenant_id" = String, Path, description = "Tenant ID")
+    ),
+    responses(
+        (status = 200, description = "List of users", body = Vec<users::Model>),
+        (status = 401, description = "Unauthorized"),
+        (status = 403, description = "Forbidden - Admin access required")
+    ),
+    security(
+        ("bearer" = [])
+    )
+)]
 pub async fn get_users(
     State(db): State<Arc<DatabaseConnection>>,
     AdminRoleWithTenant { tenant_id, .. }: AdminRoleWithTenant,

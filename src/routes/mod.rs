@@ -1,4 +1,5 @@
 use crate::{
+    api_doc::ApiDoc,
     config::{Config, create_cors_layer},
     handlers::{auth, health, tenants, users},
     middleware::auth::AuthState,
@@ -11,6 +12,8 @@ use axum::{
 };
 use sea_orm::DatabaseConnection;
 use std::sync::Arc;
+use utoipa::OpenApi;
+use utoipa_swagger_ui::SwaggerUi;
 
 #[derive(Clone)]
 pub struct AppState {
@@ -43,7 +46,6 @@ pub fn create_router(db: Arc<DatabaseConnection>, config: Arc<Config>) -> Router
 
     let cors = create_cors_layer(&config);
 
-    // Auth routes
     let auth_routes = Router::new()
         .route("/api/auth/register", post(auth::register))
         .route("/api/auth/login", post(auth::login))
@@ -73,6 +75,7 @@ pub fn create_router(db: Arc<DatabaseConnection>, config: Arc<Config>) -> Router
         );
 
     Router::new()
+        .merge(SwaggerUi::new("/swagger-ui").url("/api-docs/openapi.json", ApiDoc::openapi()))
         .merge(public_routes)
         .merge(auth_routes)
         .merge(authenticated_routes)

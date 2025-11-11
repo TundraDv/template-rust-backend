@@ -1,11 +1,12 @@
 use crate::models::tenants;
+use crate::utils::error::AppError;
 use sea_orm::{DatabaseConnection, EntityTrait};
 use uuid::Uuid;
 
 pub struct TenantsService;
 
 impl TenantsService {
-    pub async fn list_all(db: &DatabaseConnection) -> Result<Vec<tenants::Model>, anyhow::Error> {
+    pub async fn list_all(db: &DatabaseConnection) -> Result<Vec<tenants::Model>, AppError> {
         let tenants_list = tenants::Entity::find().all(db).await?;
         Ok(tenants_list)
     }
@@ -13,11 +14,11 @@ impl TenantsService {
     pub async fn get_by_id(
         db: &DatabaseConnection,
         tenant_id: Uuid,
-    ) -> Result<tenants::Model, anyhow::Error> {
+    ) -> Result<tenants::Model, AppError> {
         let tenant = tenants::Entity::find_by_id(tenant_id)
             .one(db)
             .await?
-            .ok_or_else(|| anyhow::anyhow!("Tenant not found"))?;
+            .ok_or(AppError::TenantNotFound)?;
         Ok(tenant)
     }
 }

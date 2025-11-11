@@ -1,16 +1,14 @@
 use crate::services::tenants_service::TenantsService;
-use axum::{extract::State, http::StatusCode, response::Json};
+use crate::utils::error::AppError;
+use axum::{extract::State, response::Json};
 use sea_orm::DatabaseConnection;
-use serde_json::{Value, json};
+use serde_json::Value;
 use std::sync::Arc;
 
 pub async fn list_tenants(
     State(db): State<Arc<DatabaseConnection>>,
-) -> Result<Json<Value>, StatusCode> {
-    let tenants = TenantsService::list_all(&db).await.map_err(|e| {
-        tracing::error!("Failed to list tenants: {:?}", e);
-        StatusCode::INTERNAL_SERVER_ERROR
-    })?;
+) -> Result<Json<Value>, AppError> {
+    let tenants = TenantsService::list_all(&db).await?;
 
-    Ok(Json(json!(tenants)))
+    Ok(Json(serde_json::json!(tenants)))
 }

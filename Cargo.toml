@@ -27,6 +27,7 @@ anyhow = "1.0"
 thiserror = "1.0"
 async-trait = "0.1"
 log = "0.4"
+validator = { version = "0.18", features = ["derive"] }
 migration = { path = "migration" }
 sea-orm-migration = "2.0.0-rc.10"
 urlencoding = "2.1"

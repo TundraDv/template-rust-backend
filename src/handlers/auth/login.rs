@@ -1,11 +1,12 @@
 use crate::{
     config::Config,
-    middleware::auth::BearerToken,
+    middleware::{auth::BearerToken, validation::validate_request},
     services::auth_service::{AuthService, LoginRequest},
+    utils::error::AppError,
 };
-use axum::{extract::State, http::StatusCode, response::Json};
+use axum::{extract::State, response::Json};
 use sea_orm::DatabaseConnection;
-use serde_json::{Value, json};
+use serde_json::Value;
 use std::sync::Arc;
 
 pub async fn login(
@@ -13,38 +14,27 @@ pub async fn login(
     State(config): State<Arc<Config>>,
     _bearer_token: BearerToken,
     Json(payload): Json<LoginRequest>,
-) -> Result<Json<Value>, StatusCode> {
+) -> Result<Json<Value>, AppError> {
+    let payload = validate_request(payload)?;
     let email = payload.email.clone();
     tracing::info!("Login attempt for email: {}", email);
-    let result = AuthService::login(
+
+    let response = AuthService::login(
         &db,
         payload,
         &config.jwt_secret,
         config.jwt_expiration_minutes,
     )
-    .await;
+    .await?;
 
-    match result {
-        Ok(response) => {
-            tracing::info!(
-                "Login successful: user_id={}, tenant_id={}",
-                response.user.id,
-                response.user.tenant_id
-            );
-            Ok(Json(json!({
-                "token": response.token,
-                "user": response.user,
-            })))
-        }
-        Err(e) => {
-            let error_msg = e.to_string();
-            tracing::warn!("Login failed for email: {}, error: {}", email, error_msg);
-            if error_msg == "USER_NOT_VALIDATED" {
-                return Ok(Json(json!({
-                    "error": "USER_NOT_VALIDATED"
-                })));
-            }
-            Err(StatusCode::UNAUTHORIZED)
-        }
-    }
+    tracing::info!(
+        "Login successful: user_id={}, tenant_id={}",
+        response.user.id,
+        response.user.tenant_id
+    );
+
+    Ok(Json(serde_json::json!({
+        "token": response.token,
+        "user": response.user,
+    })))
 }

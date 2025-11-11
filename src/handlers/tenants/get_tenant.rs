@@ -1,17 +1,15 @@
 use crate::services::tenants_service::TenantsService;
-use crate::utils::TenantAccess;
-use axum::{extract::State, http::StatusCode, response::Json};
+use crate::utils::{TenantAccess, error::AppError};
+use axum::{extract::State, response::Json};
 use sea_orm::DatabaseConnection;
-use serde_json::{Value, json};
+use serde_json::Value;
 use std::sync::Arc;
 
 pub async fn get_tenant(
     State(db): State<Arc<DatabaseConnection>>,
     TenantAccess { tenant_id, .. }: TenantAccess,
-) -> Result<Json<Value>, StatusCode> {
-    let tenant = TenantsService::get_by_id(&db, tenant_id)
-        .await
-        .map_err(|_| StatusCode::NOT_FOUND)?;
+) -> Result<Json<Value>, AppError> {
+    let tenant = TenantsService::get_by_id(&db, tenant_id).await?;
 
-    Ok(Json(json!(tenant)))
+    Ok(Json(serde_json::json!(tenant)))
 }

@@ -1,7 +1,8 @@
 use crate::{
-    config::Config,
-    handlers::{auth, tenants, users},
+    config::{Config, create_cors_layer},
+    handlers::{auth, health, tenants, users},
     middleware::auth::AuthState,
+    middleware::tracing_middleware,
 };
 use axum::{
     Router,
@@ -10,7 +11,6 @@ use axum::{
 };
 use sea_orm::DatabaseConnection;
 use std::sync::Arc;
-use tower_http::cors::CorsLayer;
 
 #[derive(Clone)]
 pub struct AppState {
@@ -36,23 +36,15 @@ pub fn create_router(db: Arc<DatabaseConnection>, config: Arc<Config>) -> Router
         bearer_token: config.jwt_secret.clone(),
     });
 
-    let app_state = AppState { db, config };
+    let app_state = AppState {
+        db,
+        config: config.clone(),
+    };
 
-    let cors = CorsLayer::new()
-        .allow_origin(tower_http::cors::Any)
-        .allow_methods([
-            axum::http::Method::GET,
-            axum::http::Method::POST,
-            axum::http::Method::PUT,
-            axum::http::Method::DELETE,
-            axum::http::Method::OPTIONS,
-            axum::http::Method::PATCH,
-        ])
-        .allow_headers(tower_http::cors::Any)
-        .expose_headers(tower_http::cors::Any)
-        .max_age(std::time::Duration::from_secs(3600));
+    let cors = create_cors_layer(&config);
 
     let public_routes = Router::new()
+        .route("/health", get(health::health_check))
         .route("/api/auth/register", post(auth::register))
         .route("/api/auth/login", post(auth::login))
         .route("/api/tenants", get(tenants::list_tenants));
@@ -81,6 +73,7 @@ pub fn create_router(db: Arc<DatabaseConnection>, config: Arc<Config>) -> Router
         .merge(public_routes)
         .merge(authenticated_routes)
         .merge(admin_routes)
+        .layer(axum::middleware::from_fn(tracing_middleware))
         .layer(cors)
         .layer(axum::Extension(auth_state))
         .with_state(app_state)

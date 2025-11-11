@@ -1,5 +1,6 @@
 use crate::enums::{UserRole, UserStatus};
 use crate::models::users;
+use crate::utils::error::AppError;
 use sea_orm::{ActiveModelTrait, ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter, Set};
 use uuid::Uuid;
 
@@ -10,13 +11,13 @@ impl UsersService {
         db: &DatabaseConnection,
         user_id: Uuid,
         tenant_id: Uuid,
-    ) -> Result<users::Model, anyhow::Error> {
+    ) -> Result<users::Model, AppError> {
         let user = users::Entity::find()
             .filter(users::Column::Id.eq(user_id))
             .filter(users::Column::TenantId.eq(tenant_id))
             .one(db)
             .await?
-            .ok_or_else(|| anyhow::anyhow!("User not found"))?;
+            .ok_or(AppError::UserNotFound)?;
 
         let new_status = match user.status {
             UserStatus::Active => UserStatus::Inactive,
@@ -34,13 +35,13 @@ impl UsersService {
         db: &DatabaseConnection,
         user_id: Uuid,
         tenant_id: Uuid,
-    ) -> Result<users::Model, anyhow::Error> {
+    ) -> Result<users::Model, AppError> {
         let user = users::Entity::find()
             .filter(users::Column::Id.eq(user_id))
             .filter(users::Column::TenantId.eq(tenant_id))
             .one(db)
             .await?
-            .ok_or_else(|| anyhow::anyhow!("User not found"))?;
+            .ok_or(AppError::UserNotFound)?;
 
         let new_role = match user.role {
             UserRole::Admin => UserRole::Regular,

@@ -8,6 +8,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     tracing_subscriber::fmt()
         .with_env_filter("template_rust_backend=debug,tower_http=debug,sqlx=debug")
+        .with_span_events(tracing_subscriber::fmt::format::FmtSpan::FULL)
         .init();
 
     let db_config = config::DatabaseConfig::from_env()
@@ -31,10 +32,16 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
     }
 
-    let app = routes::create_router(db.clone(), config);
+    let app = routes::create_router(db.clone(), config.clone());
 
-    let listener = tokio::net::TcpListener::bind("0.0.0.0:8070").await?;
-    tracing::info!("Server listening on http://0.0.0.0:8070");
+    let listener =
+        tokio::net::TcpListener::bind(format!("{}:{}", config.server_host, config.server_port))
+            .await?;
+    tracing::info!(
+        "Server listening on http://{}:{}",
+        config.server_host,
+        config.server_port
+    );
     axum::serve(listener, app).await?;
 
     Ok(())

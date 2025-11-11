@@ -1,0 +1,11 @@
+use sea_orm::entity::prelude::*;
+use serde::{Deserialize, Serialize};
+
+#[derive(Debug, Clone, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize, Copy)]
+#[sea_orm(rs_type = "String", db_type = "Enum", enum_name = "tenant_status")]
+pub enum TenantStatus {
+    #[sea_orm(string_value = "active")]
+    Active,
+    #[sea_orm(string_value = "inactive")]
+    Inactive,
+}

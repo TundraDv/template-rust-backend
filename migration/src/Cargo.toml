@@ -1,0 +1,18 @@
+[package]
+name = "migration"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "migration"
+path = "src/main.rs"
+
+[dependencies]
+sea-orm-migration = { version = "0.12", features = ["postgres"] }
+async-trait = "0.1"
+sea-orm = { version = "0.12", features = ["runtime-tokio-native-tls", "postgres", "macros", "with-chrono", "with-uuid"] }
+tokio = { version = "1", features = ["full"] }
+uuid = { version = "1.6", features = ["v7", "serde"] }
+chrono = "0.4"
+dotenv = "0.15"
+

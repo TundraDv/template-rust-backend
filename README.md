@@ -49,6 +49,15 @@ ENVIRONMENT=dev             # Options: dev, development, prod, production (Defau
 
 # CORS Configuration (Required in production)
 FRONTEND_URL=https://your-frontend.com  # Required when ENVIRONMENT=production
+
+# Database Connection Pool Configuration
+# Development defaults: max=10, min=2, connect_timeout=10s, idle_timeout=600s, max_lifetime=1800s
+# Production defaults: max=20, min=5, connect_timeout=5s, idle_timeout=300s, max_lifetime=1800s
+DB_MAX_CONNECTIONS=20       # Maximum number of connections in pool
+DB_MIN_CONNECTIONS=5        # Minimum number of connections in pool
+DB_CONNECT_TIMEOUT_SECS=5   # Connection timeout in seconds
+DB_IDLE_TIMEOUT_SECS=300    # Idle connection timeout in seconds
+DB_MAX_LIFETIME_SECS=1800   # Maximum connection lifetime in seconds
 ```
 
 ### Configuration Details
@@ -62,6 +71,20 @@ FRONTEND_URL=https://your-frontend.com  # Required when ENVIRONMENT=production
   - `dev` or `development`: Allows all CORS origins
   - `prod` or `production`: Restricts CORS to `FRONTEND_URL`
 - **FRONTEND_URL**: Frontend URL for CORS in production (required when `ENVIRONMENT=production`)
+- **DB_MAX_CONNECTIONS**: Maximum number of database connections in pool
+  - Development default: `10`
+  - Production default: `20`
+- **DB_MIN_CONNECTIONS**: Minimum number of database connections in pool
+  - Development default: `2`
+  - Production default: `5`
+- **DB_CONNECT_TIMEOUT_SECS**: Connection timeout in seconds
+  - Development default: `10`
+  - Production default: `5`
+- **DB_IDLE_TIMEOUT_SECS**: Idle connection timeout in seconds
+  - Development default: `600` (10 minutes)
+  - Production default: `300` (5 minutes)
+- **DB_MAX_LIFETIME_SECS**: Maximum connection lifetime in seconds
+  - Default: `1800` (30 minutes) for both environments
 
 ## Error Structure
 

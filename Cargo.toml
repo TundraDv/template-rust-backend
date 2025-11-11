@@ -31,6 +31,8 @@ validator = { version = "0.18", features = ["derive"] }
 migration = { path = "migration" }
 sea-orm-migration = "2.0.0-rc.10"
 urlencoding = "2.1"
+utoipa = { version = "4.2", features = ["axum_extras", "chrono", "uuid"] }
+utoipa-swagger-ui = { version = "6.0", features = ["axum"] }
 [dev-dependencies]
 cargo-husky = { version = "1.5.0", features = ["precommit-hook", "run-cargo-check", "run-cargo-fmt", "run-cargo-test"] }
 mockall = "0.12"

@@ -1,7 +1,6 @@
 use axum::Router;
-use sea_orm::DatabaseConnection;
 use std::sync::Arc;
-use template_rust_backend::{config, routes};
+use template_rust_backend::config;
 
 /// Setup a test application router
 /// Note: This requires a test database to be set up

@@ -43,14 +43,17 @@ pub fn create_router(db: Arc<DatabaseConnection>, config: Arc<Config>) -> Router
 
     let cors = create_cors_layer(&config);
 
-    let public_routes = Router::new()
-        .route("/health", get(health::health_check))
+    // Auth routes
+    let auth_routes = Router::new()
         .route("/api/auth/register", post(auth::register))
         .route("/api/auth/login", post(auth::login))
+        .route("/api/auth/refresh", post(auth::refresh));
+
+    let public_routes = Router::new()
+        .route("/health", get(health::health_check))
         .route("/api/tenants", get(tenants::list_tenants));
 
     let authenticated_routes = Router::new()
-        .route("/api/auth/refresh", post(auth::refresh))
         .route("/api/me", get(users::me))
         .route("/api/tenants/{tenant_id}", get(tenants::get_tenant))
         .route(
@@ -71,6 +74,7 @@ pub fn create_router(db: Arc<DatabaseConnection>, config: Arc<Config>) -> Router
 
     Router::new()
         .merge(public_routes)
+        .merge(auth_routes)
         .merge(authenticated_routes)
         .merge(admin_routes)
         .layer(axum::middleware::from_fn(tracing_middleware))
